@@ -37,12 +37,23 @@ class	Process_img():
 		avg = [r / cnt, g / cnt, b / cnt, 255]
 		return (avg)
 				
+	def	color_to_str(self, tile):
+		colors = {
+			'hero' : [255, 0, 0],
+			'piece' : [255, 165, 0],
+			'dark' : [0, 0, 0]
+		}
+		distances = {}
+		manhattan = lambda x, y: abs(x[0] - y[0]) + abs(x[1] - y[1]) + abs(x[2] - y[2])
+		for key, value in colors.items():
+			distances.update({key : manhattan(value, tile)})
+		tile_type = min(distances, key=distances.get)
+		return tile_type
+
 
 	def	detect_shapes(self, img): # split image into 36 parts, detect colors in an image, darkest- background, has red- my piece, brightest- pieces
 		img = img.resize((48, 48), Image.ANTIALIAS)
-		img.save('suka.png')
 		img_array = np.array(img)
-		print(img_array[0][0])
 		blocks = list(map(lambda x : np.split(x, img_array.shape[1]/8, 1), # Split the columns
                         np.split(img_array, img_array.shape[0]/8, 0)))
 		new_block = np.array(blocks)
@@ -52,10 +63,14 @@ class	Process_img():
 				avg_colors.append(self.get_average_tile_color(new_block[x][y]))
 		new_colors = np.array(avg_colors)
 		new_colors = np.reshape(new_colors, (6, 6, 4))
-		print(new_colors[0][0])
-		img = Image.fromarray(new_colors.astype('uint8'), 'RGBA')
-		img.save('keks.png')
-		img.show()
+		types = []
+		for x in range(len(new_colors)):
+			for y in range(len(new_colors[x])):
+				types.append(self.color_to_str(new_colors[x][y]))
+		n_types = np.array(types)
+		n_types = np.reshape(n_types, (6, 6))
+		print(n_types)
+
 
 	def	detect_pieces(self, array, img):
 		pass
